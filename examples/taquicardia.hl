@@ -1,0 +1,7 @@
+// FC alta -> provável desidratação -> aumentar soro
+if (batimento > 100) {
+  ajustar_soro(30);
+  alerta();
+} else {
+  silenciar();
+}

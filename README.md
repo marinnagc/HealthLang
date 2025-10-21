@@ -184,3 +184,60 @@ silenciar();
 * **Para o profissional de saúde:** a linguagem é simples e legível, quase como pseudocódigo médico.
 * **Para o compilador:** comandos de ajuste são traduzidos em operações de baixo nível (`INC/DEC`) até atingir o alvo.
 * **esperar(ms):** evita loops instantâneos e simula o tempo fisiológico necessário para reavaliar sinais.
+
+
+
+lerxer.l -> Flex
+parser.y -> Bison
+
+
+# Como rodar (passo a passo)
+
+```bash
+cd src
+make
+./healthlang < ../examples/taquicardia.hl
+# Saída esperada:
+# Parsed OK
+
+./healthlang < ../examples/oxigenio.hl
+# Parsed OK
+```
+
+Se houver erro de sintaxe ou léxico, o programa imprimirá algo como:
+
+```
+Parse error at line 7: syntax error
+```
+
+ou
+
+```
+Lexical error at line 3: '@'
+```
+
+---
+
+# O que esta entrega comprova (Tarefa #2)
+
+* **Análise Léxica (Flex):** reconhece *tokens* da HealthLang (palavras-chave, números, símbolos, sensores, ações).
+* **Análise Sintática (Bison):** valida a **gramática** (EBNF → parser) com `if/else`, `while`, condições com `and/or`, ações e ajustes.
+* **Semântica & compilação:** **não inclusas** nesta etapa (conforme o enunciado).
+
+> Se quiser um “extra”, você pode fazer o parser imprimir a **árvore** ou uma **lista de nós** visitados — mas **não é obrigatório**. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+```mermaid
+flowchart LR
+  A[🩺 Código em HealthLang<br><br>Exemplo:<br>if (batimento > 100) {<br> ajustar_soro(30);<br> alerta();<br>}]
+  --> B[🔤 Flex<br>(Analisador Léxico)<br><br>Transforma o texto em tokens:<br>IF, LPAREN, BATIMENTO, GT, NUMBER, ...]
+  --> C[🧩 Bison<br>(Analisador Sintático)<br><br>Verifica se os tokens seguem a EBNF<br>e monta uma árvore sintática (AST)]
+  --> D[🧠 Análise Semântica (opcional)<br><br>Checa tipos, coerência e limites<br>(ex.: valor de O2 não negativo)]
+  --> E[⚙️ Geração de Código<br><br>Traduz a árvore para<br>assembly da VitalsVM]
+  --> F[🏗️ VitalsVM (Máquina Virtual)<br><br>Executa o código gerado:<br>ajusta O2, IV, lê sensores e aciona alerta]
+```
+> Para visualizar, use um editor que suporte **Mermaid** (ex.: VS Code com extensão, GitHub, Obsidian).
+
+
+Converta finais de linha para Unix (LF): 
+sudo apt-get install -y dos2unix
+dos2unix lexer.l parser.y

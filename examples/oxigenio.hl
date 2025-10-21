@@ -1,0 +1,12 @@
+// Oxigenoterapia progressiva com espera de 1s entre ajustes
+if (oxigenio < 92) {
+  ajustar_O2(60);
+  alerta();
+}
+
+while (oxigenio < 95) {
+  aumentar_O2(2);
+  esperar(1000);
+}
+
+silenciar();
