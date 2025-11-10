@@ -1,0 +1,10 @@
+// Exemplo: paciente começa hidratado e vai perdendo volume aos poucos
+
+ajustar_soro(80);               // começa bem hidratado
+while (intravenoso > 30) {      // desidrata até 30%
+  reduzir_soro(10);             // perde líquido aos poucos
+  esperar(5);                   // simula passagem do tempo
+  log(intravenoso);             // mostra volume atual
+  log(batimento);               // FC aumenta
+}
+log(batimento);                 // mostra batimento final

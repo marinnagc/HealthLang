@@ -1,7 +1,11 @@
-// FC alta -> provável desidratação -> aumentar soro
-if (batimento > 100) {
-  ajustar_soro(30);
+// Exemplo 1: checa taquicardia simples e sempre loga o batimento
+
+if (batimento > 90) {
+  // Se FC estiver alta, dispara alerta e loga
   alerta();
+  log(batimento);
 } else {
+  // Se FC estiver ok, só silencia mas também loga
   silenciar();
+  log(batimento);
 }

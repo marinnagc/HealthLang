@@ -1,0 +1,15 @@
+__while_cond_0:
+CJMP S_IVLV GE 80 __while_end_1
+SET IV 100
+PUSH O2
+SET O2 4
+__wait_loop_2:
+DECJZ O2 __wait_end_3
+GOTO __wait_loop_2
+__wait_end_3:
+POP O2
+PRINT S_IVLV
+GOTO __while_cond_0
+__while_end_1:
+PRINT S_BPM
+HALT

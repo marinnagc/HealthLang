@@ -54,36 +54,36 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    IF = 258,                      /* IF  */
-    ELSE = 259,                    /* ELSE  */
-    WHILE = 260,                   /* WHILE  */
-    AND = 261,                     /* AND  */
-    OR = 262,                      /* OR  */
-    AJUSTAR_O2 = 263,              /* AJUSTAR_O2  */
-    AJUSTAR_SORO = 264,            /* AJUSTAR_SORO  */
-    AUMENTAR_O2 = 265,             /* AUMENTAR_O2  */
-    REDUZIR_O2 = 266,              /* REDUZIR_O2  */
-    AUMENTAR_SORO = 267,           /* AUMENTAR_SORO  */
-    REDUZIR_SORO = 268,            /* REDUZIR_SORO  */
-    ALERTA = 269,                  /* ALERTA  */
-    SILENCIAR = 270,               /* SILENCIAR  */
-    ESPERAR = 271,                 /* ESPERAR  */
-    LOG = 272,                     /* LOG  */
-    OXIGENIO = 273,                /* OXIGENIO  */
-    BATIMENTO = 274,               /* BATIMENTO  */
-    INTRAVENOSO = 275,             /* INTRAVENOSO  */
-    LPAREN = 276,                  /* LPAREN  */
-    RPAREN = 277,                  /* RPAREN  */
-    LBRACE = 278,                  /* LBRACE  */
-    RBRACE = 279,                  /* RBRACE  */
-    SEMI = 280,                    /* SEMI  */
-    EQ = 281,                      /* EQ  */
-    NE = 282,                      /* NE  */
-    LE = 283,                      /* LE  */
-    GE = 284,                      /* GE  */
-    LT = 285,                      /* LT  */
-    GT = 286,                      /* GT  */
-    NUMBER = 287,                  /* NUMBER  */
+    OXIGENIO = 258,                /* OXIGENIO  */
+    BATIMENTO = 259,               /* BATIMENTO  */
+    INTRAVENOSO = 260,             /* INTRAVENOSO  */
+    LT = 261,                      /* LT  */
+    LE = 262,                      /* LE  */
+    GT = 263,                      /* GT  */
+    GE = 264,                      /* GE  */
+    EQ = 265,                      /* EQ  */
+    NE = 266,                      /* NE  */
+    NUMBER = 267,                  /* NUMBER  */
+    IF = 268,                      /* IF  */
+    ELSE = 269,                    /* ELSE  */
+    WHILE = 270,                   /* WHILE  */
+    AND = 271,                     /* AND  */
+    OR = 272,                      /* OR  */
+    AJUSTAR_O2 = 273,              /* AJUSTAR_O2  */
+    AJUSTAR_SORO = 274,            /* AJUSTAR_SORO  */
+    AUMENTAR_O2 = 275,             /* AUMENTAR_O2  */
+    REDUZIR_O2 = 276,              /* REDUZIR_O2  */
+    AUMENTAR_SORO = 277,           /* AUMENTAR_SORO  */
+    REDUZIR_SORO = 278,            /* REDUZIR_SORO  */
+    ALERTA = 279,                  /* ALERTA  */
+    SILENCIAR = 280,               /* SILENCIAR  */
+    ESPERAR = 281,                 /* ESPERAR  */
+    LOG = 282,                     /* LOG  */
+    LPAREN = 283,                  /* LPAREN  */
+    RPAREN = 284,                  /* RPAREN  */
+    LBRACE = 285,                  /* LBRACE  */
+    RBRACE = 286,                  /* RBRACE  */
+    SEMI = 287,                    /* SEMI  */
     ERROR = 288                    /* ERROR  */
   };
   typedef enum yytokentype yytoken_kind_t;
@@ -93,7 +93,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 23 "parser.y"
+#line 34 "parser.y"
 
   int num;
 

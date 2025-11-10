@@ -191,53 +191,159 @@ lerxer.l -> Flex
 parser.y -> Bison
 
 
-# Como rodar (passo a passo)
-
-```bash
-cd src
-make
-./healthlang < ../examples/taquicardia.hl
-# Saída esperada:
-# Parsed OK
-
-./healthlang < ../examples/oxigenio.hl
-# Parsed OK
-```
-
-Se houver erro de sintaxe ou léxico, o programa imprimirá algo como:
+## Estrutura do Repositório
 
 ```
-Parse error at line 7: syntax error
-```
-
-ou
-
-```
-Lexical error at line 3: '@'
+HealthLang/
+├── compiler/
+│   └── src/
+│       ├── lexer.l
+│       ├── parser.y
+│       ├── Makefile
+│       └── (gera healthlang)
+├── vm/
+│   ├── implementacao/
+│   │   ├── vm.py
+│   │   └── run.sh
+│   ├── testes/
+│   │   ├── taquicardia.vmasm
+│   │   └── oxigenio.vmasm
+│   └── vmasm_spec.md
+├── examples/
+│   ├── taquicardia.hl
+│   └── oxigenio.hl
+├── grammar.ebnf
+└── README.md
 ```
 
 ---
 
-# O que esta entrega comprova (Tarefa #2)
+## Etapas de Compilação e Execução
 
-* **Análise Léxica (Flex):** reconhece *tokens* da HealthLang (palavras-chave, números, símbolos, sensores, ações).
-* **Análise Sintática (Bison):** valida a **gramática** (EBNF → parser) com `if/else`, `while`, condições com `and/or`, ações e ajustes.
-* **Semântica & compilação:** **não inclusas** nesta etapa (conforme o enunciado).
+### 1. Compilar a linguagem
 
-> Se quiser um “extra”, você pode fazer o parser imprimir a **árvore** ou uma **lista de nós** visitados — mas **não é obrigatório**. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-```mermaid
-flowchart LR
-  A[🩺 Código em HealthLang<br><br>Exemplo:<br>if (batimento > 100) {<br> ajustar_soro(30);<br> alerta();<br>}]
-  --> B[🔤 Flex<br>(Analisador Léxico)<br><br>Transforma o texto em tokens:<br>IF, LPAREN, BATIMENTO, GT, NUMBER, ...]
-  --> C[🧩 Bison<br>(Analisador Sintático)<br><br>Verifica se os tokens seguem a EBNF<br>e monta uma árvore sintática (AST)]
-  --> D[🧠 Análise Semântica (opcional)<br><br>Checa tipos, coerência e limites<br>(ex.: valor de O2 não negativo)]
-  --> E[⚙️ Geração de Código<br><br>Traduz a árvore para<br>assembly da VitalsVM]
-  --> F[🏗️ VitalsVM (Máquina Virtual)<br><br>Executa o código gerado:<br>ajusta O2, IV, lê sensores e aciona alerta]
+```bash
+cd compiler/src
+make
 ```
-> Para visualizar, use um editor que suporte **Mermaid** (ex.: VS Code com extensão, GitHub, Obsidian).
 
+---
 
-Converta finais de linha para Unix (LF): 
-sudo apt-get install -y dos2unix
-dos2unix lexer.l parser.y
+### 2. Gerar os programas de teste (compilação dos exemplos)
+
+```bash
+make run
+```
+
+Esse comando compila os exemplos `.hl` (como `taquicardia.hl`) e gera os arquivos `.vmasm` correspondentes em `vm/testes/`.
+
+---
+
+### 3. Executar a VM com o programa gerado
+
+```bash
+cd ../../vm/implementacao
+./run.sh ../testes/taquicardia.vmasm
+```
+
+---
+
+### Saída esperada
+
+O programa simula o comportamento fisiológico do paciente, mostrando o valor dos sensores a cada ciclo de monitoramento.
+
+Exemplo de saída:
+
+```
+S_BPM=81
+--- ciclo 100 ---
+S_SPO2=94
+S_IVLV=52
+--- ciclo 200 ---
+S_SPO2=96
+S_IVLV=58
+```
+
+---
+
+## VitalsVM — Especificação Técnica
+
+A VitalsVM é uma máquina virtual minimalista, inspirada em Minsky Machines, com os seguintes elementos:
+
+### Registradores (mutáveis)
+
+| Nome | Função                   |
+| ---- | ------------------------ |
+| O2   | Fluxo de oxigênio        |
+| IV   | Taxa de soro intravenoso |
+
+### Sensores (somente leitura)
+
+| Nome   | Significado                     |
+| ------ | ------------------------------- |
+| S_SPO2 | Saturação de oxigênio no sangue |
+| S_BPM  | Batimentos por minuto           |
+| S_IVLV | Nível de fluido intravenoso     |
+
+### Instruções
+
+| Instrução                  | Descrição                                    | Exemplo                    |
+| -------------------------- | -------------------------------------------- | -------------------------- |
+| `SET R N`                  | Define valor do registrador                  | `SET O2 60`                |
+| `INC R`                    | Incrementa registrador                       | `INC IV`                   |
+| `DECJZ R label`            | Decrementa R e pula para label se chegar a 0 | `DECJZ O2 loop_end`        |
+| `GOTO label`               | Pula para um rótulo                          | `GOTO check`               |
+| `CJMP sensor OP val label` | Pula se condição for verdadeira              | `CJMP S_BPM GT 120 alerta` |
+| `PRINT id`                 | Exibe registrador ou sensor                  | `PRINT S_BPM`              |
+| `PUSH` / `POP`             | Pilha temporária                             |                            |
+| `HALT`                     | Finaliza o programa                          |                            |
+
+---
+
+## Exemplo Completo
+
+### Código em HealthLang
+
+```c
+AJUSTAR_SORO(40);
+WHILE (BATIMENTO > 120) {
+    AJUSTAR_SORO(60);
+    ALERTA();
+    ESPERAR(5);
+}
+```
+
+### Código gerado (.vmasm)
+
+```asm
+SET IV 40
+__while_cond_0:
+CJMP S_BPM LE 120 __while_end_1
+SET IV 60
+PRINT S_BPM
+PUSH O2
+SET O2 5
+__wait_loop_2:
+DECJZ O2 __wait_end_3
+GOTO __wait_loop_2
+__wait_end_3:
+POP O2
+GOTO __while_cond_0
+__while_end_1:
+HALT
+```
+
+---
+
+## Sobre o Loop Contínuo
+
+Por ser uma simulação de **monitoramento vital**, a VM executa indefinidamente, simulando um sistema de UTI em funcionamento contínuo.
+O parâmetro `--steps` no `run.sh` define o limite de iterações (para evitar travar o terminal durante testes).
+
+---
+
+**Marinna Grigolli Cesar**
+Engenharia da Computação — Insper
+2025.2
+
+```

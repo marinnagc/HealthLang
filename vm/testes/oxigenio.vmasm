@@ -1,0 +1,17 @@
+CJMP S_SPO2 GE 95 __iffalse_0
+SET O2 70
+PUSH O2
+SET O2 5
+__wait_loop_2:
+DECJZ O2 __wait_end_3
+GOTO __wait_loop_2
+__wait_end_3:
+POP O2
+PRINT S_SPO2
+PRINT S_BPM
+GOTO __ifend_1
+__iffalse_0:
+PRINT S_SPO2
+; SILENCIAR sem efeito
+__ifend_1:
+HALT

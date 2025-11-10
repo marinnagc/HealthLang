@@ -22,6 +22,10 @@ clean:
 # Rodar: ./healthlang < ../examples/taquicardia.hl
 run:
 	@echo "==> Teste taquicardia"
-	./healthlang < ../examples/taquicardia.hl
+	./healthlang < ../../examples/taquicardia.hl > ../../vm/testes/taquicardia.vmasm
 	@echo "==> Teste oxigenio"
-	./healthlang < ../examples/oxigenio.hl
+	./healthlang < ../../examples/oxigenio.hl > ../../vm/testes/oxigenio.vmasm
+	@echo "==> Teste soro"
+	./healthlang < ../../examples/soro.hl > ../../vm/testes/soro.vmasm
+	@echo "==> Teste desidratacao"
+	./healthlang < ../../examples/desidratacao.hl > ../../vm/testes/desidratacao.vmasm

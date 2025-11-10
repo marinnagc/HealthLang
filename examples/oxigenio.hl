@@ -1,12 +1,12 @@
-// Oxigenoterapia progressiva com espera de 1s entre ajustes
-if (oxigenio < 92) {
-  ajustar_O2(60);
-  alerta();
-}
+// Exemplo: controle de oxigênio com log e espera
+// Se o nível de oxigênio estiver baixo, ajusta e loga a evolução.
 
-while (oxigenio < 95) {
-  aumentar_O2(2);
-  esperar(1000);
+if (oxigenio < 95) {
+  ajustar_O2(70);     // aumenta a oferta de oxigênio
+  esperar(5);         // aguarda estabilização
+  log(oxigenio);      // mostra saturação atual
+  alerta();           // mostra FC, pois saturação pode alterar batimento
+} else {
+  log(oxigenio);      // se já está bom, só registra
+  silenciar();        // não faz nada além de registrar
 }
-
-silenciar();

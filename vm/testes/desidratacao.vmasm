@@ -1,0 +1,46 @@
+SET IV 80
+__while_cond_0:
+CJMP S_IVLV LE 30 __while_end_1
+DECJZ IV __decok_2
+GOTO __decok_2
+__decok_2:
+DECJZ IV __decok_3
+GOTO __decok_3
+__decok_3:
+DECJZ IV __decok_4
+GOTO __decok_4
+__decok_4:
+DECJZ IV __decok_5
+GOTO __decok_5
+__decok_5:
+DECJZ IV __decok_6
+GOTO __decok_6
+__decok_6:
+DECJZ IV __decok_7
+GOTO __decok_7
+__decok_7:
+DECJZ IV __decok_8
+GOTO __decok_8
+__decok_8:
+DECJZ IV __decok_9
+GOTO __decok_9
+__decok_9:
+DECJZ IV __decok_10
+GOTO __decok_10
+__decok_10:
+DECJZ IV __decok_11
+GOTO __decok_11
+__decok_11:
+PUSH O2
+SET O2 5
+__wait_loop_12:
+DECJZ O2 __wait_end_13
+GOTO __wait_loop_12
+__wait_end_13:
+POP O2
+PRINT S_IVLV
+PRINT S_BPM
+GOTO __while_cond_0
+__while_end_1:
+PRINT S_BPM
+HALT

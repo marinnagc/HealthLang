@@ -1,0 +1,9 @@
+CJMP S_BPM LE 90 __iffalse_0
+PRINT S_BPM
+PRINT S_BPM
+GOTO __ifend_1
+__iffalse_0:
+; SILENCIAR sem efeito
+PRINT S_BPM
+__ifend_1:
+HALT

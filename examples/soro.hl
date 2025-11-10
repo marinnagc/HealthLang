@@ -1,0 +1,10 @@
+// Exemplo 2: repõe volume até atingir pelo menos 80% no sensor de intravenoso
+
+while (intravenoso < 80) {
+  ajustar_soro(100);   // coloca o soro no máximo
+  esperar(4);         // espera um pouco para o modelo da VM atualizar
+  log(intravenoso);    // mostra o nível de volume no sangue
+}
+
+// No fim, mostra também o batimento para ver o efeito do soro na FC
+log(batimento);
