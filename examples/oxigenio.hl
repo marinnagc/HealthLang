@@ -2,10 +2,10 @@
 // Se o nível de oxigênio estiver baixo, ajusta e loga a evolução.
 
 if (oxigenio < 95) {
-  ajustar_O2(70);     // aumenta a oferta de oxigênio
-  esperar(5);         // aguarda estabilização
-  log(oxigenio);      // mostra saturação atual
-  alerta();           // mostra FC, pois saturação pode alterar batimento
+  ajustar_O2(70);
+  esperar(20);    // espera mais tempo pra ver o efeito
+  log(oxigenio);
+  log(batimento);
 } else {
   log(oxigenio);      // se já está bom, só registra
   silenciar();        // não faz nada além de registrar
