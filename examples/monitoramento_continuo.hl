@@ -1,0 +1,46 @@
+// Monitoramento Contínuo de UTI
+// Simula um sistema que roda indefinidamente, verificando sinais vitais
+// e ajustando parâmetros conforme necessário
+
+// Loop infinito de monitoramento (condição sempre verdadeira)
+while (batimento >= 0) {
+    
+    // Verifica saturação de oxigênio
+    if (oxigenio < 92) {
+        ajustar_O2(70);
+        alerta();
+        log(oxigenio);
+    }
+    
+    // Verifica taquicardia
+    if (batimento > 120) {
+        aumentar_soro(5);
+        alerta();
+        log(batimento);
+    }
+    
+    // Verifica bradicardia
+    if (batimento < 50) {
+        reduzir_soro(3);
+        alerta();
+        log(batimento);
+    }
+    
+    // Verifica hipóxia severa
+    if (oxigenio < 85) {
+        ajustar_O2(100);
+        alerta();
+    }
+    
+    // Verifica se níveis estão estáveis
+    if (oxigenio >= 95) {
+        if (batimento >= 60) {
+            if (batimento <= 100) {
+                silenciar();
+            }
+        }
+    }
+    
+    // Pausa entre ciclos de verificação (simula tempo de monitoramento)
+    esperar(50);
+}
