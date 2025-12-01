@@ -21,9 +21,22 @@ static void fresh(const char *base, char *buf) {
     sprintf(buf, "__%s_%d", base, label_id++);
 }
 
-/* labels globais simples – não suportam if/while aninhados */
-static char if_false_label[32], if_end_label[32];
-static char while_cond_label[32], while_end_label[32];
+/* Estrutura para suportar ifs/whiles aninhados */
+typedef struct {
+    char false_label[32];
+    char end_label[32];
+} IfLabels;
+
+typedef struct {
+    char cond_label[32];
+    char end_label[32];
+} WhileLabels;
+
+#define MAX_NESTING 50
+static IfLabels if_stack[MAX_NESTING];
+static int if_depth = 0;
+static WhileLabels while_stack[MAX_NESTING];
+static int while_depth = 0;
 
 /* helpers declarados aqui, definidos depois da gramática */
 static const char *sensor_name(int s);
@@ -77,14 +90,15 @@ statement
 if_prefix
   : IF LPAREN sensor comparison NUMBER RPAREN
     {
-      fresh("iffalse", if_false_label);
-      fresh("ifend",  if_end_label);
+      fresh("iffalse", if_stack[if_depth].false_label);
+      fresh("ifend",  if_stack[if_depth].end_label);
 
       const char *s  = sensor_name($3);
       const char *op = invert_op($4);
 
       /* pula para if_false se condição for falsa */
-      emit("CJMP %s %s %d %s", s, op, $5, if_false_label);
+      emit("CJMP %s %s %d %s", s, op, $5, if_stack[if_depth].false_label);
+      if_depth++;
     }
   ;
 
@@ -92,22 +106,26 @@ if_stmt
   /* if (cond) { then } */
   : if_prefix block
     {
-      emit("GOTO %s", if_end_label);
-      emit("%s:", if_false_label);
-      emit("%s:", if_end_label);
+      if_depth--;
+      emit("GOTO %s", if_stack[if_depth].end_label);
+      emit("%s:", if_stack[if_depth].false_label);
+      emit("%s:", if_stack[if_depth].end_label);
     }
 
   /* if (cond) { then } else { else } */
   | if_prefix block
     {
+      if_depth--;
       /* fim do THEN: pula por cima do ELSE e marca label do falso */
-      emit("GOTO %s", if_end_label);
-      emit("%s:", if_false_label);
+      emit("GOTO %s", if_stack[if_depth].end_label);
+      emit("%s:", if_stack[if_depth].false_label);
+      if_depth++;
     }
     ELSE
     block
     {
-      emit("%s:", if_end_label);
+      if_depth--;
+      emit("%s:", if_stack[if_depth].end_label);
     }
   ;
 
@@ -115,19 +133,21 @@ if_stmt
 while_stmt
   : WHILE LPAREN sensor comparison NUMBER RPAREN
     {
-      fresh("while_cond", while_cond_label);
-      fresh("while_end",  while_end_label);
+      fresh("while_cond", while_stack[while_depth].cond_label);
+      fresh("while_end",  while_stack[while_depth].end_label);
 
       const char *s  = sensor_name($3);
       const char *op = invert_op($4);
 
-      emit("%s:", while_cond_label);
-      emit("CJMP %s %s %d %s", s, op, $5, while_end_label);
+      emit("%s:", while_stack[while_depth].cond_label);
+      emit("CJMP %s %s %d %s", s, op, $5, while_stack[while_depth].end_label);
+      while_depth++;
     }
     block
     {
-      emit("GOTO %s", while_cond_label);
-      emit("%s:", while_end_label);
+      while_depth--;
+      emit("GOTO %s", while_stack[while_depth].cond_label);
+      emit("%s:", while_stack[while_depth].end_label);
     }
   ;
 
@@ -238,9 +258,31 @@ void yyerror(const char *s) {
   fprintf(stderr, "Parse error at line %d: %s\n", yylineno, s);
 }
 
+extern FILE *yyin;
+
 int main(int argc, char **argv) {
-  (void)argc; (void)argv;
-  out = stdout;
-  if (yyparse() == 0) return 0;
-  return 1;
+  if (argc < 3) {
+    fprintf(stderr, "Usage: %s <input.hl> <output.vmasm>\n", argv[0]);
+    return 1;
+  }
+  
+  yyin = fopen(argv[1], "r");
+  if (!yyin) {
+    perror(argv[1]);
+    return 1;
+  }
+  
+  out = fopen(argv[2], "w");
+  if (!out) {
+    perror(argv[2]);
+    fclose(yyin);
+    return 1;
+  }
+  
+  int ret = yyparse();
+  
+  fclose(yyin);
+  fclose(out);
+  
+  return ret;
 }

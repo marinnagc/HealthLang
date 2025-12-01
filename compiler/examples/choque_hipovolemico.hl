@@ -1,0 +1,43 @@
+// Exemplo: detecção de choque hipovolêmico
+// Condição grave quando há taquicardia, hipóxia e baixo volume intravascular
+// Versão simplificada usando ifs aninhados (parser não suporta AND/OR ainda)
+
+// Verifica choque hipovolêmico (múltiplos sinais críticos)
+if (batimento > 120) {
+    if (oxigenio < 90) {
+        if (intravenoso < 30) {
+            // Situação crítica: intervir agressivamente
+            ajustar_O2(100);
+            ajustar_soro(100);
+            alerta();
+            log(batimento);
+            log(oxigenio);
+            log(intravenoso);
+        }
+    }
+}
+
+// Verifica se precisa de oxigênio
+if (oxigenio < 92) {
+    ajustar_O2(70);
+    alerta();
+    log(oxigenio);
+}
+
+// Verifica se precisa de soro
+if (intravenoso < 40) {
+    ajustar_soro(60);
+    alerta();
+    log(intravenoso);
+}
+
+// Verifica se paciente está estável
+if (batimento >= 60) {
+    if (batimento <= 100) {
+        if (oxigenio >= 95) {
+            silenciar();
+            log(batimento);
+            log(oxigenio);
+        }
+    }
+}

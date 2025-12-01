@@ -1,0 +1,48 @@
+CJMP S_BPM LE 120 __iffalse_0
+CJMP S_SPO2 GE 90 __iffalse_2
+CJMP S_IVLV GE 30 __iffalse_4
+SET O2 100
+SET IV 100
+PRINT S_BPM
+PRINT S_BPM
+PRINT S_SPO2
+PRINT S_IVLV
+GOTO __ifend_5
+__iffalse_4:
+__ifend_5:
+GOTO __ifend_3
+__iffalse_2:
+__ifend_3:
+GOTO __ifend_1
+__iffalse_0:
+__ifend_1:
+CJMP S_SPO2 GE 92 __iffalse_6
+SET O2 70
+PRINT S_BPM
+PRINT S_SPO2
+GOTO __ifend_7
+__iffalse_6:
+__ifend_7:
+CJMP S_IVLV GE 40 __iffalse_8
+SET IV 60
+PRINT S_BPM
+PRINT S_IVLV
+GOTO __ifend_9
+__iffalse_8:
+__ifend_9:
+CJMP S_BPM LT 60 __iffalse_10
+CJMP S_BPM GT 100 __iffalse_12
+CJMP S_SPO2 LT 95 __iffalse_14
+; SILENCIAR sem efeito
+PRINT S_BPM
+PRINT S_SPO2
+GOTO __ifend_15
+__iffalse_14:
+__ifend_15:
+GOTO __ifend_13
+__iffalse_12:
+__ifend_13:
+GOTO __ifend_11
+__iffalse_10:
+__ifend_11:
+HALT

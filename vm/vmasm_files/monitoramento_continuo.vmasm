@@ -1,0 +1,64 @@
+__while_cond_0:
+CJMP S_BPM LT 0 __while_end_1
+CJMP S_SPO2 GE 92 __iffalse_2
+SET O2 70
+PRINT S_BPM
+PRINT S_SPO2
+GOTO __ifend_3
+__iffalse_2:
+__ifend_3:
+CJMP S_BPM LE 120 __iffalse_4
+INC IV
+INC IV
+INC IV
+INC IV
+INC IV
+PRINT S_BPM
+PRINT S_BPM
+GOTO __ifend_5
+__iffalse_4:
+__ifend_5:
+CJMP S_BPM GE 50 __iffalse_6
+DECJZ IV __decok_8
+GOTO __decok_8
+__decok_8:
+DECJZ IV __decok_9
+GOTO __decok_9
+__decok_9:
+DECJZ IV __decok_10
+GOTO __decok_10
+__decok_10:
+PRINT S_BPM
+PRINT S_BPM
+GOTO __ifend_7
+__iffalse_6:
+__ifend_7:
+CJMP S_SPO2 GE 85 __iffalse_11
+SET O2 100
+PRINT S_BPM
+GOTO __ifend_12
+__iffalse_11:
+__ifend_12:
+CJMP S_SPO2 LT 95 __iffalse_13
+CJMP S_BPM LT 60 __iffalse_15
+CJMP S_BPM GT 100 __iffalse_17
+; SILENCIAR sem efeito
+GOTO __ifend_18
+__iffalse_17:
+__ifend_18:
+GOTO __ifend_16
+__iffalse_15:
+__ifend_16:
+GOTO __ifend_14
+__iffalse_13:
+__ifend_14:
+PUSH O2
+SET O2 50
+__wait_loop_19:
+DECJZ O2 __wait_end_20
+GOTO __wait_loop_19
+__wait_end_20:
+POP O2
+GOTO __while_cond_0
+__while_end_1:
+HALT

@@ -91,15 +91,28 @@ static void fresh(const char *base, char *buf) {
     sprintf(buf, "__%s_%d", base, label_id++);
 }
 
-/* labels globais simples – não suportam if/while aninhados */
-static char if_false_label[32], if_end_label[32];
-static char while_cond_label[32], while_end_label[32];
+/* Estrutura para suportar ifs/whiles aninhados */
+typedef struct {
+    char false_label[32];
+    char end_label[32];
+} IfLabels;
+
+typedef struct {
+    char cond_label[32];
+    char end_label[32];
+} WhileLabels;
+
+#define MAX_NESTING 50
+static IfLabels if_stack[MAX_NESTING];
+static int if_depth = 0;
+static WhileLabels while_stack[MAX_NESTING];
+static int while_depth = 0;
 
 /* helpers declarados aqui, definidos depois da gramática */
 static const char *sensor_name(int s);
 static const char *invert_op(int op);
 
-#line 103 "parser.tab.c"
+#line 116 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -565,10 +578,10 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    56,    56,    60,    61,    65,    66,    67,    68,    69,
-      70,    71,    78,    93,   102,   101,   117,   116,   136,   141,
-     142,   143,   146,   149,   157,   169,   170,   175,   191,   192,
-     193,   198,   199,   200,   204,   205,   206,   207,   208,   209
+       0,    69,    69,    73,    74,    78,    79,    80,    81,    82,
+      83,    84,    91,   107,   117,   116,   135,   134,   156,   161,
+     162,   163,   166,   169,   177,   189,   190,   195,   211,   212,
+     213,   218,   219,   220,   224,   225,   226,   227,   228,   229
 };
 #endif
 
@@ -1187,108 +1200,115 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: statements  */
-#line 56 "parser.y"
+#line 69 "parser.y"
                            { emit("HALT"); }
-#line 1193 "parser.tab.c"
+#line 1206 "parser.tab.c"
     break;
 
   case 12: /* if_prefix: IF LPAREN sensor comparison NUMBER RPAREN  */
-#line 79 "parser.y"
+#line 92 "parser.y"
     {
-      fresh("iffalse", if_false_label);
-      fresh("ifend",  if_end_label);
+      fresh("iffalse", if_stack[if_depth].false_label);
+      fresh("ifend",  if_stack[if_depth].end_label);
 
       const char *s  = sensor_name((yyvsp[-3].num));
       const char *op = invert_op((yyvsp[-2].num));
 
       /* pula para if_false se condição for falsa */
-      emit("CJMP %s %s %d %s", s, op, (yyvsp[-1].num), if_false_label);
+      emit("CJMP %s %s %d %s", s, op, (yyvsp[-1].num), if_stack[if_depth].false_label);
+      if_depth++;
     }
-#line 1208 "parser.tab.c"
+#line 1222 "parser.tab.c"
     break;
 
   case 13: /* if_stmt: if_prefix block  */
-#line 94 "parser.y"
+#line 108 "parser.y"
     {
-      emit("GOTO %s", if_end_label);
-      emit("%s:", if_false_label);
-      emit("%s:", if_end_label);
+      if_depth--;
+      emit("GOTO %s", if_stack[if_depth].end_label);
+      emit("%s:", if_stack[if_depth].false_label);
+      emit("%s:", if_stack[if_depth].end_label);
     }
-#line 1218 "parser.tab.c"
+#line 1233 "parser.tab.c"
     break;
 
   case 14: /* $@1: %empty  */
-#line 102 "parser.y"
+#line 117 "parser.y"
     {
+      if_depth--;
       /* fim do THEN: pula por cima do ELSE e marca label do falso */
-      emit("GOTO %s", if_end_label);
-      emit("%s:", if_false_label);
+      emit("GOTO %s", if_stack[if_depth].end_label);
+      emit("%s:", if_stack[if_depth].false_label);
+      if_depth++;
     }
-#line 1228 "parser.tab.c"
+#line 1245 "parser.tab.c"
     break;
 
   case 15: /* if_stmt: if_prefix block $@1 ELSE block  */
-#line 109 "parser.y"
+#line 126 "parser.y"
     {
-      emit("%s:", if_end_label);
+      if_depth--;
+      emit("%s:", if_stack[if_depth].end_label);
     }
-#line 1236 "parser.tab.c"
+#line 1254 "parser.tab.c"
     break;
 
   case 16: /* $@2: %empty  */
-#line 117 "parser.y"
+#line 135 "parser.y"
     {
-      fresh("while_cond", while_cond_label);
-      fresh("while_end",  while_end_label);
+      fresh("while_cond", while_stack[while_depth].cond_label);
+      fresh("while_end",  while_stack[while_depth].end_label);
 
       const char *s  = sensor_name((yyvsp[-3].num));
       const char *op = invert_op((yyvsp[-2].num));
 
-      emit("%s:", while_cond_label);
-      emit("CJMP %s %s %d %s", s, op, (yyvsp[-1].num), while_end_label);
+      emit("%s:", while_stack[while_depth].cond_label);
+      emit("CJMP %s %s %d %s", s, op, (yyvsp[-1].num), while_stack[while_depth].end_label);
+      while_depth++;
     }
-#line 1251 "parser.tab.c"
+#line 1270 "parser.tab.c"
     break;
 
   case 17: /* while_stmt: WHILE LPAREN sensor comparison NUMBER RPAREN $@2 block  */
-#line 128 "parser.y"
+#line 147 "parser.y"
     {
-      emit("GOTO %s", while_cond_label);
-      emit("%s:", while_end_label);
-    }
-#line 1260 "parser.tab.c"
-    break;
-
-  case 19: /* adjust_stmt: AJUSTAR_O2 LPAREN NUMBER RPAREN SEMI  */
-#line 141 "parser.y"
-                                           { emit("SET O2 %d", (yyvsp[-2].num)); }
-#line 1266 "parser.tab.c"
-    break;
-
-  case 20: /* adjust_stmt: AJUSTAR_SORO LPAREN NUMBER RPAREN SEMI  */
-#line 142 "parser.y"
-                                           { emit("SET IV %d", (yyvsp[-2].num)); }
-#line 1272 "parser.tab.c"
-    break;
-
-  case 21: /* adjust_stmt: AUMENTAR_O2 LPAREN NUMBER RPAREN SEMI  */
-#line 143 "parser.y"
-                                           {
-      for(int i=0;i<(yyvsp[-2].num);i++) emit("INC O2");
+      while_depth--;
+      emit("GOTO %s", while_stack[while_depth].cond_label);
+      emit("%s:", while_stack[while_depth].end_label);
     }
 #line 1280 "parser.tab.c"
     break;
 
+  case 19: /* adjust_stmt: AJUSTAR_O2 LPAREN NUMBER RPAREN SEMI  */
+#line 161 "parser.y"
+                                           { emit("SET O2 %d", (yyvsp[-2].num)); }
+#line 1286 "parser.tab.c"
+    break;
+
+  case 20: /* adjust_stmt: AJUSTAR_SORO LPAREN NUMBER RPAREN SEMI  */
+#line 162 "parser.y"
+                                           { emit("SET IV %d", (yyvsp[-2].num)); }
+#line 1292 "parser.tab.c"
+    break;
+
+  case 21: /* adjust_stmt: AUMENTAR_O2 LPAREN NUMBER RPAREN SEMI  */
+#line 163 "parser.y"
+                                           {
+      for(int i=0;i<(yyvsp[-2].num);i++) emit("INC O2");
+    }
+#line 1300 "parser.tab.c"
+    break;
+
   case 22: /* adjust_stmt: AUMENTAR_SORO LPAREN NUMBER RPAREN SEMI  */
-#line 146 "parser.y"
+#line 166 "parser.y"
                                             {
       for(int i=0;i<(yyvsp[-2].num);i++) emit("INC IV");
     }
-#line 1288 "parser.tab.c"
+#line 1308 "parser.tab.c"
     break;
 
   case 23: /* adjust_stmt: REDUZIR_O2 LPAREN NUMBER RPAREN SEMI  */
-#line 149 "parser.y"
+#line 169 "parser.y"
                                            {
       for(int i=0;i<(yyvsp[-2].num);i++){
         char L[32]; fresh("decok", L);
@@ -1297,11 +1317,11 @@ yyreduce:
         emit("%s:", L);
       }
     }
-#line 1301 "parser.tab.c"
+#line 1321 "parser.tab.c"
     break;
 
   case 24: /* adjust_stmt: REDUZIR_SORO LPAREN NUMBER RPAREN SEMI  */
-#line 157 "parser.y"
+#line 177 "parser.y"
                                            {
       for(int i=0;i<(yyvsp[-2].num);i++){
         char L[32]; fresh("decok", L);
@@ -1310,23 +1330,23 @@ yyreduce:
         emit("%s:", L);
       }
     }
-#line 1314 "parser.tab.c"
+#line 1334 "parser.tab.c"
     break;
 
   case 25: /* action_stmt: ALERTA LPAREN RPAREN SEMI  */
-#line 169 "parser.y"
+#line 189 "parser.y"
                                  { emit("PRINT S_BPM"); }
-#line 1320 "parser.tab.c"
+#line 1340 "parser.tab.c"
     break;
 
   case 26: /* action_stmt: SILENCIAR LPAREN RPAREN SEMI  */
-#line 170 "parser.y"
+#line 190 "parser.y"
                                  { emit("; SILENCIAR sem efeito"); }
-#line 1326 "parser.tab.c"
+#line 1346 "parser.tab.c"
     break;
 
   case 27: /* wait_stmt: ESPERAR LPAREN NUMBER RPAREN SEMI  */
-#line 175 "parser.y"
+#line 195 "parser.y"
                                       {
       char L1[32], L2[32];
       fresh("wait_loop", L1);
@@ -1339,83 +1359,83 @@ yyreduce:
       emit("%s:", L2);
       emit("POP O2");
     }
-#line 1343 "parser.tab.c"
+#line 1363 "parser.tab.c"
     break;
 
   case 28: /* log_stmt: LOG LPAREN OXIGENIO RPAREN SEMI  */
-#line 191 "parser.y"
+#line 211 "parser.y"
                                        { emit("PRINT S_SPO2"); }
-#line 1349 "parser.tab.c"
+#line 1369 "parser.tab.c"
     break;
 
   case 29: /* log_stmt: LOG LPAREN BATIMENTO RPAREN SEMI  */
-#line 192 "parser.y"
+#line 212 "parser.y"
                                        { emit("PRINT S_BPM"); }
-#line 1355 "parser.tab.c"
+#line 1375 "parser.tab.c"
     break;
 
   case 30: /* log_stmt: LOG LPAREN INTRAVENOSO RPAREN SEMI  */
-#line 193 "parser.y"
+#line 213 "parser.y"
                                        { emit("PRINT S_IVLV"); }
-#line 1361 "parser.tab.c"
+#line 1381 "parser.tab.c"
     break;
 
   case 31: /* sensor: OXIGENIO  */
-#line 198 "parser.y"
+#line 218 "parser.y"
                 { (yyval.num) = 1; }
-#line 1367 "parser.tab.c"
+#line 1387 "parser.tab.c"
     break;
 
   case 32: /* sensor: BATIMENTO  */
-#line 199 "parser.y"
+#line 219 "parser.y"
                 { (yyval.num) = 2; }
-#line 1373 "parser.tab.c"
+#line 1393 "parser.tab.c"
     break;
 
   case 33: /* sensor: INTRAVENOSO  */
-#line 200 "parser.y"
+#line 220 "parser.y"
                 { (yyval.num) = 3; }
-#line 1379 "parser.tab.c"
+#line 1399 "parser.tab.c"
     break;
 
   case 34: /* comparison: LT  */
-#line 204 "parser.y"
+#line 224 "parser.y"
        { (yyval.num) = LT; }
-#line 1385 "parser.tab.c"
+#line 1405 "parser.tab.c"
     break;
 
   case 35: /* comparison: LE  */
-#line 205 "parser.y"
+#line 225 "parser.y"
        { (yyval.num) = LE; }
-#line 1391 "parser.tab.c"
+#line 1411 "parser.tab.c"
     break;
 
   case 36: /* comparison: GT  */
-#line 206 "parser.y"
+#line 226 "parser.y"
        { (yyval.num) = GT; }
-#line 1397 "parser.tab.c"
+#line 1417 "parser.tab.c"
     break;
 
   case 37: /* comparison: GE  */
-#line 207 "parser.y"
+#line 227 "parser.y"
        { (yyval.num) = GE; }
-#line 1403 "parser.tab.c"
+#line 1423 "parser.tab.c"
     break;
 
   case 38: /* comparison: EQ  */
-#line 208 "parser.y"
+#line 228 "parser.y"
        { (yyval.num) = EQ; }
-#line 1409 "parser.tab.c"
+#line 1429 "parser.tab.c"
     break;
 
   case 39: /* comparison: NE  */
-#line 209 "parser.y"
+#line 229 "parser.y"
        { (yyval.num) = NE; }
-#line 1415 "parser.tab.c"
+#line 1435 "parser.tab.c"
     break;
 
 
-#line 1419 "parser.tab.c"
+#line 1439 "parser.tab.c"
 
       default: break;
     }
@@ -1608,7 +1628,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 212 "parser.y"
+#line 232 "parser.y"
 
 
 static const char *sensor_name(int s) {
@@ -1638,9 +1658,31 @@ void yyerror(const char *s) {
   fprintf(stderr, "Parse error at line %d: %s\n", yylineno, s);
 }
 
+extern FILE *yyin;
+
 int main(int argc, char **argv) {
-  (void)argc; (void)argv;
-  out = stdout;
-  if (yyparse() == 0) return 0;
-  return 1;
+  if (argc < 3) {
+    fprintf(stderr, "Usage: %s <input.hl> <output.vmasm>\n", argv[0]);
+    return 1;
+  }
+  
+  yyin = fopen(argv[1], "r");
+  if (!yyin) {
+    perror(argv[1]);
+    return 1;
+  }
+  
+  out = fopen(argv[2], "w");
+  if (!out) {
+    perror(argv[2]);
+    fclose(yyin);
+    return 1;
+  }
+  
+  int ret = yyparse();
+  
+  fclose(yyin);
+  fclose(out);
+  
+  return ret;
 }

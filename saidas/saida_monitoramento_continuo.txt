@@ -1,0 +1,34 @@
+--- ciclo 100 ---
+S_BPM=120
+S_SPO2=87
+--- ciclo 200 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 300 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 400 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 500 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 600 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 700 ---
+--- ciclo 800 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 900 ---
+S_BPM=120
+S_SPO2=91
+--- ciclo 1000 ---
+Traceback (most recent call last):
+  File "/home/marinnagc/workspace/HealthLang/vm/implementacao/vm.py", line 221, in <module>
+    main()
+  File "/home/marinnagc/workspace/HealthLang/vm/implementacao/vm.py", line 218, in main
+    run(prog, labels, step_limit=args.steps)
+  File "/home/marinnagc/workspace/HealthLang/vm/implementacao/vm.py", line 108, in run
+    raise RuntimeError(f"Step limit atingido ({step_limit}). Possível loop infinito.")
+RuntimeError: Step limit atingido (1000). Possível loop infinito.

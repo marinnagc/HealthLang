@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+"""
+VitalsVM - Máquina Virtual para HealthLang
+===========================================
+
+VM Turing-completa customizada para simulação de protocolos clínicos.
+Inspirada em Minsky Machines com modelo fisiológico integrado.
+
+Autora: Marinna Grigolli Cesar
+Insper - Engenharia da Computação - 2025.2
+"""
 import sys
 import math
 import argparse

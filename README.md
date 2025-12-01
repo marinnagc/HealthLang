@@ -187,8 +187,10 @@ silenciar();
 
 
 
-lerxer.l -> Flex
-parser.y -> Bison
+**Ferramentas:**
+- Flex → Análise Léxica (lexer.l)
+- Bison → Análise Sintática (parser.y)
+- VitalsVM → Máquina Virtual customizada
 
 
 ## Estrutura do Repositório
@@ -196,24 +198,35 @@ parser.y -> Bison
 ```
 HealthLang/
 ├── compiler/
-│   └── src/
-│       ├── lexer.l
-│       ├── parser.y
-│       ├── Makefile
-│       └── (gera healthlang)
+│   ├── src/              # Código fonte do compilador (Flex/Bison)
+│   │   ├── lexer.l       # Analisador léxico
+│   │   ├── parser.y      # Analisador sintático
+│   │   ├── Makefile      # Script de compilação
+│   │   └── healthlang    # Executável gerado
+│   └── examples/         # Programas de exemplo em HealthLang
+│       ├── choque_hipovolemico.hl
+│       ├── desidratacao.hl
+│       ├── monitoramento_continuo.hl
+│       ├── oxigenio.hl
+│       ├── soro.hl
+│       └── taquicardia.hl
 ├── vm/
-│   ├── implementacao/
-│   │   ├── vm.py
-│   │   └── run.sh
-│   ├── testes/
-│   │   ├── taquicardia.vmasm
-│   │   └── oxigenio.vmasm
-│   └── vmasm_spec.md
-├── examples/
-│   ├── taquicardia.hl
-│   └── oxigenio.hl
-├── grammar.ebnf
-└── README.md
+│   ├── implementacao/    # Código da máquina virtual
+│   │   ├── vm.py         # Interpretador VitalsVM
+│   │   └── run.sh        # Script auxiliar
+│   ├── vmasm_files/      # Arquivos assembly compilados
+│   │   ├── choque_hipovolemico.vmasm
+│   │   ├── desidratacao.vmasm
+│   │   ├── monitoramento_continuo.vmasm
+│   │   ├── oxigenio.vmasm
+│   │   ├── soro.vmasm
+│   │   └── taquicardia.vmasm
+│   └── vmasm_spec.md     # Especificação da VM e ISA
+├── saidas/               # Resultados das execuções
+│   └── saida_*.txt       # Logs de saída dos programas
+├── grammar.ebnf          # Gramática formal EBNF da linguagem
+├── README.md             # Documentação principal
+└── TUTORIAL.md           # Guia passo a passo de uso
 ```
 
 ---
@@ -266,9 +279,9 @@ S_IVLV=58
 
 ---
 
-## VitalsVM — Especificação Técnica
+## VitalsVM — Nossa Máquina Virtual
 
-A VitalsVM é uma máquina virtual minimalista, inspirada em Minsky Machines, com os seguintes elementos:
+A **VitalsVM** é uma máquina virtual customizada, minimalista e Turing-completa, inspirada em Minsky Machines, criada especificamente para simular protocolos clínicos. Elementos:
 
 ### Registradores (mutáveis)
 
